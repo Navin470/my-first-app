@@ -1,5 +1,34 @@
 pipeline {
-    agent any
+    agent {
+        kubernetes {
+            defaultContainer 'docker'
+            yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: docker
+    image: docker:27-cli
+    command:
+      - cat
+    tty: true
+    volumeMounts:
+    - name: docker-sock
+      mountPath: /var/run/docker.sock
+
+  - name: kubectl
+    image: rancher/kubectl:v1.31.0
+    command:
+      - cat
+    tty: true
+
+  volumes:
+  - name: docker-sock
+    hostPath:
+      path: /var/run/docker.sock
+"""
+        }
+    }
 
     stages {
 
@@ -12,14 +41,25 @@ pipeline {
 
         stage('Build Image') {
             steps {
-                sh 'docker build -t html-app:v1 .'
+                container('docker') {
+                    sh '''
+                        which docker
+                        docker version
+                        docker build -t html-app:v1 .
+                    '''
+                }
             }
         }
 
         stage('Deploy') {
             steps {
-                sh 'kubectl apply -f deployment.yaml'
-                sh 'kubectl apply -f service.yaml'
+                container('kubectl') {
+                    sh '''
+                        kubectl version --client
+                        kubectl apply -f deployment.yaml
+                        kubectl apply -f service.yaml
+                    '''
+                }
             }
         }
     }
