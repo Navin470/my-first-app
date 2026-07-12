@@ -20,7 +20,7 @@ spec:
         mountPath: /var/run/docker.sock
 
   - name: kubectl
-    image: bitnami/kubectl:1.31
+    image: alpine/kubectl:1.36.2
     command:
       - sleep
     args:
