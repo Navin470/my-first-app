@@ -7,25 +7,30 @@ apiVersion: v1
 kind: Pod
 spec:
   containers:
+
   - name: docker
     image: docker:27-cli
     command:
-      - cat
+      - sleep
+    args:
+      - "99d"
     tty: true
     volumeMounts:
-    - name: docker-sock
-      mountPath: /var/run/docker.sock
+      - name: docker-sock
+        mountPath: /var/run/docker.sock
 
   - name: kubectl
-    image: rancher/kubectl:v1.31.0
+    image: bitnami/kubectl:1.31
     command:
-      - cat
+      - sleep
+    args:
+      - "99d"
     tty: true
 
   volumes:
-  - name: docker-sock
-    hostPath:
-      path: /var/run/docker.sock
+    - name: docker-sock
+      hostPath:
+        path: /var/run/docker.sock
 """
         }
     }
